@@ -25,7 +25,8 @@ export function fetchChatAPIProcess<T = any>(
     prompt: string
     options?: { conversationId?: string; parentMessageId?: string }
     signal?: GenericAbortSignal
-    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
+    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void
+  },
 ) {
   const settingStore = useSettingStore()
 
@@ -40,6 +41,13 @@ export function fetchChatAPIProcess<T = any>(
 export function fetchSession<T>() {
   return post<T>({
     url: '/session',
+  })
+}
+
+export function fetchToken<T>(code: string) {
+  return post<T>({
+    url: '/verify',
+    data: { code },
   })
 }
 

@@ -1,4 +1,7 @@
 import express from 'express'
+import jwt from 'jsonwebtoken'
+import { expressjwt } from 'express-jwt'
+import { debug } from 'debug'
 import type { RequestProps } from './types'
 import type { ChatMessage } from './chatgpt'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
@@ -6,11 +9,15 @@ import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 
+const secretKey = 'abdbdodjod-^-^-'
 const app = express()
 const router = express.Router()
 
 app.use(express.static('public'))
 app.use(express.json())
+app.use(
+  expressjwt({ secret: secretKey, algorithms: ['HS256'] }).unless({ path: ['/session', '/verify'] }),
+) // /匹配的内容/ ^不在\转义/api/
 
 app.all('*', (_, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')
@@ -19,10 +26,11 @@ app.all('*', (_, res, next) => {
   next()
 })
 
-router.post('/chat-process', [auth, limiter], async (req, res) => {
+router.post('/chat-process', [limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
   try {
+    debug('123333', 12312)
     const { prompt, options = {}, systemMessage } = req.body as RequestProps
     let firstChunk = true
     await chatReplyProcess({
@@ -66,14 +74,14 @@ router.post('/session', async (req, res) => {
 
 router.post('/verify', async (req, res) => {
   try {
-    const { token } = req.body as { token: string }
-    if (!token)
+    const { code } = req.body as { code: string }
+    if (!code)
       throw new Error('Secret key is empty')
-
-    if (process.env.AUTH_SECRET_KEY !== token)
-      throw new Error('密钥无效 | Secret key is invalid')
-
-    res.send({ status: 'Success', message: 'Verify successfully', data: null })
+    // 用户信息对象 密钥 有效期
+    const tokenStr = jwt.sign(
+      { username: code }, secretKey, { expiresIn: '3h' },
+    )
+    res.send({ status: 'Success', message: 'Verify successfully', data: tokenStr })
   }
   catch (error) {
     res.send({ status: 'Fail', message: error.message, data: null })

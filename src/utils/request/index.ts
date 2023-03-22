@@ -69,6 +69,11 @@ export function get<T = any>(
 export function post<T = any>(
   { url, data, method = 'POST', headers, onDownloadProgress, signal, beforeRequest, afterRequest }: HttpOption,
 ): Promise<Response<T>> {
+  const authStore = useAuthStore()
+  const token = authStore.token
+  headers = {
+    Authorization: `Bearer ${token}`,
+  }
   return http<T>({
     url,
     method,
