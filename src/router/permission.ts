@@ -3,21 +3,19 @@ import { useAuthStoreWithout } from '@/store/modules/auth'
 
 export function setupPageGuard(router: Router) {
   router.beforeEach(async (to, from, next) => {
-    // const code = window.location.href
+    const code = getUrlParam('code', window.location.href)
     // 初始化进来的时候authStore.session是null
     const authStore = useAuthStoreWithout()
-    console.log('session', authStore.session)
     if (!authStore.session) {
       try {
         const data = await authStore.getSession()
-        console.log('data', data)
         if (String(data.auth) === 'false' && authStore.token)
           authStore.removeToken()
-        console.log('token1', authStore.token)
         if (String(data.auth) === 'true' && authStore.token === undefined) {
-          const token = await authStore.fetchToken('80123045')
-          authStore.setToken(token)
-          console.log('token2', authStore.token)
+          await authStore.fetchToken(code)
+            .then((data) => {
+              authStore.setToken(data)
+            })
         }
 
         if (to.path === '/500')
@@ -26,7 +24,7 @@ export function setupPageGuard(router: Router) {
         else
           next()
       }
-      catch (error) {
+      catch (error: any) {
         if (to.path !== '/500')
           next({ name: '500' })
         else
@@ -37,4 +35,11 @@ export function setupPageGuard(router: Router) {
       next()
     }
   })
+}
+
+function getUrlParam(name: string, url: string): any {
+  const u = url || window.location.href
+  const reg = new RegExp(`(^|&)${name}=([^&]*)(&|$)`)
+  const r = u.substr(u.indexOf('?') + 1).match(reg)
+  return r != null ? decodeURI(r[2]) : ''
 }

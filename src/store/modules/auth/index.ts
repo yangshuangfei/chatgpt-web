@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth-store', {
     async fetchToken(code: string) {
       try {
         const { data } = await fetchToken<string>(code)
-        this.token = data
+        // this.token = data
         return Promise.resolve(data)
       }
       catch (error) {

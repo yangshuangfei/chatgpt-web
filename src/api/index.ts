@@ -46,7 +46,7 @@ export function fetchSession<T>() {
 
 export function fetchToken<T>(code: string) {
   return post<T>({
-    url: '/verify',
+    url: '/login',
     data: { code },
   })
 }
