@@ -13,7 +13,7 @@ import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 import { minxin } from './config'
 import { access_token } from './utils/access_token'
-const cors = require("cors")
+import cors from "cors"
 
 const secretKey = 'abdbdodjod-^-^-'
 const app = express()
@@ -111,8 +111,12 @@ router.post('/login', async (req, res) => {
       const url = minxin.url
       const response = await axios.get(`${url}auth/getuserinfo?access_token=${data}&code=${code}`)
       userid = response.data.userid
-      if (userid == null || userid === undefined)
-        throw new Error('获取用户信息失败')
+      if (response.data === undefined || userid == null || userid === undefined) {
+        // throw new Error('获取用户信息失败')
+        res.send({ status: 'Fail', message: "获取用户信息失败", data: null })
+        return;
+      }
+
       const tokenStr = jwt.sign(
         { username: userid }, secretKey, { expiresIn: '2h' },
       )
@@ -126,5 +130,21 @@ router.post('/login', async (req, res) => {
 
 app.use('', router)
 app.use('/api', router)
+//在所有路由后面定义错误中间件
+//使用全局错误处理中间件 捕获解析 JWT 失败后产生的错误
+app.use((err, req, res, next) => {
+  //判断是否由 Token 解析失败导致的
+  if (err.name == 'UnauthorizedError') {
+    return res.send({
+      status: 'Unauthorized',
+      message: '无效的Token'
+    })
+  }
+  res.send({
+    status: 500,
+    message: '未知的错误'
+  })
+})
+
 
 app.listen(19038, () => globalThis.console.log('Server is running on port 19038'))

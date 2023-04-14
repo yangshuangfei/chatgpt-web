@@ -30,7 +30,7 @@ function http<T = any>(
 
     if (res.data.status === 'Unauthorized') {
       authStore.removeToken()
-      window.location.reload()
+      window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=ww976c0a7c9d9753af&redirect_uri=http://chatgpttest.qiaqiafood.com:19037/&response_type=code&scope=snsapi_base&state=STATE&agentid=AGENTID#wechat_redirect'
     }
 
     return Promise.reject(res.data)

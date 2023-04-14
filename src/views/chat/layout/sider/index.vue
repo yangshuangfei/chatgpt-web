@@ -1,29 +1,26 @@
 <script setup lang='ts'>
 import type { CSSProperties } from 'vue'
-import { computed, ref, watch } from 'vue'
+// import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { NButton, NLayoutSider } from 'naive-ui'
 import List from './List.vue'
 import Footer from './Footer.vue'
 import { useAppStore, useChatStore } from '@/store'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { PromptStore } from '@/components/common'
+// import { PromptStore } from '@/components/common'
 
 const appStore = useAppStore()
 const chatStore = useChatStore()
 
 const { isMobile } = useBasicLayout()
-const show = ref(false)
+// const show = ref(false)
 
 const collapsed = computed(() => appStore.siderCollapsed)
 
 function handleAdd() {
-<<<<<<< HEAD
   chatStore.addHistory({ title: 'New Qia', uuid: Date.now(), isEdit: false })
-=======
-  chatStore.addHistory({ title: 'New Chat', uuid: Date.now(), isEdit: false })
   if (isMobile.value)
     appStore.setSiderCollapsed(true)
->>>>>>> upgrade/main
 }
 
 function handleUpdateCollapsed() {
@@ -83,11 +80,11 @@ watch(
         <div class="flex-1 min-h-0 pb-4 overflow-hidden">
           <List />
         </div>
-        <div class="p-4">
+        <!-- <div class="p-4">
           <NButton block @click="show = true">
             Prompt Store
           </NButton>
-        </div>
+        </div> -->
       </main>
       <Footer />
     </div>
@@ -95,5 +92,5 @@ watch(
   <template v-if="isMobile">
     <div v-show="!collapsed" class="fixed inset-0 z-40 bg-black/40" @click="handleUpdateCollapsed" />
   </template>
-  <PromptStore v-model:visible="show" />
+  <!-- <PromptStore v-model:visible="show" /> -->
 </template>
